@@ -1,0 +1,33 @@
+import os
+
+Import('env', 'solution_configs', 'msvs_variants')
+
+PROJECT_NAME = 'extract-bitlocker-key'
+
+sources = [str(f) for f in Glob('*.cpp')]
+headers = [str(f) for f in Glob('*.h')]
+
+env.Append(CPPFLAGS=['/DUNICODE', '/D_UNICODE'])
+env.Append(CCFLAGS=['/W4', '/EHsc'])
+env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
+
+variant = env.get('variant', 'debug|x64') 
+build_type, arch = variant.split('|')
+
+build_dir = f"{arch}/{build_type}"
+os.makedirs(build_dir, exist_ok=True)
+
+output_exe = env.Program(target=os.path.join(build_dir, PROJECT_NAME), source=sources)
+
+if env['vsproj'] == 'yes':
+    extract_bitlocker_key_project = env.MSVSProject(
+        target=PROJECT_NAME + env['MSVSPROJECTSUFFIX'],
+        srcs=sources,
+        incs=headers,
+        variant=msvs_variants,
+        buildtarget=str(output_exe[0]),
+        auto_build_solution=False,
+        upgrade=True,
+    )
+
+    Export('extract_bitlocker_key_project')
