@@ -1,0 +1,1 @@
+SOLUTION_NAME = 'wxwidgets-starter'
